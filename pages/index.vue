@@ -1,78 +1,88 @@
 <template>
-  <div class="container">
-    <div>
-      <Logo />
-      <h1 class="title">
-        cartclient
-      </h1>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
+  <div>
+    <div class="md:p-4">
+      <VueSlickCarousel v-bind="settings">
+        <nuxt-link
+          :to="`/urun/${product.slug}`"
+          :key="product.slug"
+          v-for="product in productsMentionedSlider"
         >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-      </div>
+          <img
+            :src="product.image"
+            alt=""
+            class="img-fluid md:pr-2"
+            width="500"
+            height="500"
+          />
+          <p v-text="product.slider_order"></p>
+        </nuxt-link>
+      </VueSlickCarousel>
     </div>
   </div>
 </template>
 
 <script>
-export default {}
+import { mapGetters } from "vuex";
+import VueSlickCarousel from "vue-slick-carousel";
+import "vue-slick-carousel/dist/vue-slick-carousel.css";
+// optional style for arrows & dots
+import "vue-slick-carousel/dist/vue-slick-carousel-theme.css";
+
+export default {
+  data() {
+    return {
+      settings: {
+        infinite: true,
+        speed: 500,
+        slidesToShow: 3,
+        slidesToScroll: 1,
+        touchThreshold: 5,
+        arrows: true,
+        dots: true,
+        responsive: [
+          {
+            breakpoint: 768,
+            settings: {
+              slidesToShow: 1,
+            },
+          },
+          {
+            breakpoint: 1280,
+            settings: {
+              slidesToShow: 2,
+            },
+          },
+        ],
+      },
+
+      products: null,
+      showOnSliderProducts: null,
+      showOnHomePageProducts: null,
+    };
+  },
+  components: {
+    VueSlickCarousel,
+  },
+  computed: {
+    ...mapGetters({
+      categories: "categories",
+    }),
+  },
+  async asyncData({ params, app }) {
+    let [
+      products,
+      productsMentionedHomepage,
+      productsMentionedSlider,
+    ] = await Promise.all([
+      app.$axios.$get(`/products`),
+      app.$axios.$get(`/products?homepage=true`),
+      app.$axios.$get(`/products?slider=true`),
+    ]);
+    return {
+      product: products.data,
+      productsMentionedHomepage: productsMentionedHomepage.data,
+      productsMentionedSlider: productsMentionedSlider.data,
+    };
+  },
+};
 </script>
-
-<style>
-/* Sample `apply` at-rules with Tailwind CSS
-.container {
-@apply min-h-screen flex justify-center items-center text-center mx-auto;
-}
-*/
-.container {
-  margin: 0 auto;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.title {
-  font-family:
-    'Quicksand',
-    'Source Sans Pro',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
-}
-</style>
