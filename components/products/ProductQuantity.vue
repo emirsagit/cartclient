@@ -23,7 +23,7 @@
         min="1"
         :max="$parent.stock"
         :disabled="!$parent.stock"
-        @changed="changedQuantityFromTextField"
+        @keyup="changedQuantityFromTextField"
       />
       <button
         class="bg-gray-300 text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-20 rounded-r cursor-pointer"
@@ -39,6 +39,7 @@
 export default {
   methods: {
     changedQuantityFromTextField() {
+      console.log('burada');
       if (this.$parent.quantity > this.$parent.stock) {
         this.$parent.quantity = this.$parent.stock;
       } else if (this.$parent.quantity < 1) {
