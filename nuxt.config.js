@@ -48,25 +48,29 @@ export default {
         provider: "laravel/sanctum",
         url: "http://laravel.loc",
         endpoints: {
-          login: { url: "/api/sanctum/token", method: "post" },
+          login: { url: "/sanctum/token", method: "post" }
         },
         token: {
           property: "access_token",
           maxAge: 3600
         },
         scheme: "local",
-      },
+        user: {
+          property: 'data',
+          autoFetch: false
+        },
+      }
     }
   },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseUrl: process.env.BASE_URL || 'http://laravel.loc/api/',
+    baseUrl: process.env.BASE_URL || "http://laravel.loc/api/",
     credentials: true
   },
 
   env: {
-    DEVICE_NAME: process.env.DEVICE_NAME || 'browser'
+    DEVICE_NAME: process.env.DEVICE_NAME || "browser"
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

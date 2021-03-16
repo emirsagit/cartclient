@@ -4,14 +4,61 @@
   >
     <div class="flex flex-col max-w-screen-xl mx-auto md:px-6 lg:px-8">
       <div class="flex flex-col items-end">
-        <div class="flex flex-row font-bold">
+        <div class="flex flex-row font-bold py-1 items-center">
           <template v-if="this.$auth.loggedIn">
             <p class="px-2">Hoşgeldiniz {{ this.$auth.user.name }}</p>
-            <a href="#" class="px-2 text-teal-700 hover:text-teal-800" @click.prevent="logout">Çıkış</a>
+            <a
+              href="#"
+              class="px-2 text-teal-700 hover:text-teal-800"
+              @click.prevent="logout"
+              >Çıkış</a
+            >
+            <nuxt-link to="/sepet" class="pl-2 pr-6 flex flex-row cursor-pointer">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="black"
+                class="h-8 w-8"
+              >
+                <path
+                  d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"
+                />
+              </svg>
+              <p
+                class="text-sm font-bold font-sans text-white bg-red-700 rounded-full absolute px-2 ml-6"
+                v-if="cartCount > 0"
+                v-text="cartCount"
+              ></p>
+            </nuxt-link>
           </template>
-           <template v-else>
-            <nuxt-link to="/login" class="px-2 text-blue-700 hover:text-blue-800">Giriş</nuxt-link>
-            <nuxt-link to="/register" class="px-2 text-teal-700 hover:text-teal-800">Kayıt</nuxt-link>
+          <template v-else>
+            <nuxt-link
+              to="/login"
+              class="px-2 text-blue-700 hover:text-blue-800"
+              >Giriş</nuxt-link
+            >
+            <nuxt-link
+              to="/register"
+              class="px-2 text-teal-700 hover:text-teal-800"
+              >Kayıt</nuxt-link
+            >
+            <a href="#" class="pl-2 pr-6 flex flex-row">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="black"
+                class="h-8 w-8"
+              >
+                <path
+                  d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"
+                />
+              </svg>
+              <p
+                class="text-sm font-bold font-sans text-white bg-red-700 rounded-full absolute px-2 ml-6"
+                v-if="cartCount"
+                v-text="cartCount"
+              ></p>
+            </a>
           </template>
         </div>
       </div>
@@ -127,13 +174,14 @@ export default {
 
   methods: {
     async logout() {
-      await this.$auth.logout()
-    }
+      await this.$auth.logout();
+    },
   },
 
   computed: {
     ...mapGetters({
       categories: "categories",
+      cartCount: "cart/count",
     }),
   },
 };

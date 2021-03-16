@@ -111,6 +111,7 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
   data() {
     return {
@@ -125,6 +126,10 @@ export default {
   },
 
   methods: {
+    ...mapActions({
+      getCart: "cart/getCart",
+    }),
+
     async register() {
       try {
         await this.$axios.post("http://laravel.loc/register", this.form);
@@ -136,6 +141,7 @@ export default {
           },
         });
         await this.$auth.strategy.token.set(response.data.token);
+        await this.getCart();
         await this.$auth.setUser(response.data.user);
       } catch (error) {
         this.errors = error.response.data.errors;

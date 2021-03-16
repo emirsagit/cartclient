@@ -54,20 +54,22 @@ export default {
           },
         ],
       },
-
       products: null,
       showOnSliderProducts: null,
       showOnHomePageProducts: null,
     };
   },
+
   components: {
     VueSlickCarousel,
   },
+
   computed: {
     ...mapGetters({
       categories: "categories",
     }),
   },
+
   async asyncData({ params, app }) {
     let [
       products,
