@@ -16,8 +16,17 @@
       </thead>
       <tbody class="w-full pb-4">
         <template v-for="product in products">
-          <cart-overview-product :product="product" :key="product.id"/>
+          <cart-overview-product :product="product" :key="product.id" />
         </template>
+        <tr
+          class="flex h-36 py-2 px-1 mb-4"
+        >
+          <td
+            class="flex w-full flex-col p-1 md:p-2 text-gray-900 items-end "
+          >
+          <p class="font-bold text-gray-900 text-xl"><span class="font-normal">Toplam:</span> {{ subtotal }}</p>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -31,6 +40,7 @@ export default {
   computed: {
     ...mapGetters({
       products: "cart/products",
+      subtotal: "cart/subtotal"
     }),
   },
 

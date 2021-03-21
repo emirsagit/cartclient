@@ -4,13 +4,12 @@
     <div
       class="flex flex-col w-full p-8 text-gray-800 bg-white shadow-lg pin-r pin-y md:w-4/5 lg:w-4/5"
     >
-      <template v-if="!products.count">
+      <template v-if="products.length">
         <cart-overview />
-
-        <button
+        <nuxt-link to="/odeme"
           class="flex justify-center w-full px-10 py-3 font-medium text-white uppercase bg-gray-800 rounded-full shadow item-center hover:bg-gray-700 focus:shadow-outline focus:outline-none"
           :disabled="isEmpty"
-          :class="{ 'opacity-50 hover:bg-gray-800' : isEmpty  }"
+          :class="{ 'opacity-50 hover:bg-gray-800': isEmpty }"
         >
           <svg
             aria-hidden="true"
@@ -26,7 +25,7 @@
             />
           </svg>
           <span class="ml-2 mt-5px">Satın Al</span>
-        </button>
+        </nuxt-link>
       </template>
       <template v-else>
         <div class="m-auto w-full">
@@ -53,6 +52,7 @@ export default {
     ...mapGetters({
       isEmpty: "cart/isEmpty",
       products: "cart/products",
+      stockHasChanged: "cart/stockHasChanged",
     }),
   },
 };

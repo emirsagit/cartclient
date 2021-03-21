@@ -47,10 +47,14 @@
           v-show="stock"
           :class="{ 'text-red-800 opacity-100': stockAlarm }"
         >
-          <span v-if="stockAlarm" class="bg-red-700 py-1 px-2 text-white font-bold rounded-lg mr-2">Tükeniyor !</span>{{ stock }} adet kaldı.
+          <span
+            v-if="stockAlarm"
+            class="bg-red-700 py-1 px-2 text-white font-bold rounded-lg mr-2"
+            >Tükeniyor !</span
+          >{{ stock }} adet kaldı.
         </p>
         <p
-          v-if="! product.in_stock"
+          v-if="!product.in_stock"
           class="bg-gray-800 p-2 text-white font-bold text-lg rounded-lg w-32 text-center"
         >
           Stokta Yok
@@ -65,17 +69,19 @@
           <p class="text-xs">Sepette %{{ product.discount }} indirim</p>
           <p class="text-red-700 text-lg">{{ price }} TL</p>
         </div>
-        <p
+        <button
           class="bg-red-600 text-white text-md py-2 px-4 rounded cursor-pointer hover:bg-red-700"
+          @click.prevent="add"
         >
           Sepete Ekle
-        </p>
+        </button>
       </div>
     </form>
   </div>
 </template>
 
 <script>
+import { mapActions } from "vuex";
 import Options from "@/components/products/Options";
 import ProductQuantity from "@/components/products/ProductQuantity";
 import VueSlickCarousel from "vue-slick-carousel";
@@ -89,13 +95,14 @@ export default {
       price: null,
       stock: "",
       quantity: 1,
+      selectedVariant: "",
     };
   },
 
   computed: {
     stockAlarm() {
-      return this.stock < 10  
-    }
+      return this.stock < 10;
+    },
   },
 
   components: {
@@ -106,9 +113,27 @@ export default {
 
   methods: {
     productVariantSelected(variant) {
+      this.selectedVariant = variant;
       this.price = variant.price;
       this.stock = variant.stock;
     },
+
+    add() {
+      this.store([
+        {
+          id: this.selectedVariant.id,
+          quantity: this.quantity,
+        },
+      ]);
+
+      this.selectedVariant = "";
+      this.quantity = "1";
+      this.$router.push('/sepet')
+    },
+
+    ...mapActions({
+      store: "cart/store",
+    }),
   },
 
   async asyncData({ params, app }) {

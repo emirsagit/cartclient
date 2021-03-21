@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="md:p-4">
-      <VueSlickCarousel v-bind="settings">
+      <VueSlickCarousel v-bind="settings" v-if="productsMentionedSlider.length">
         <nuxt-link
           :to="`/urun/${product.slug}`"
           :key="product.slug"
