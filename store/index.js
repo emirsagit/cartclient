@@ -16,11 +16,11 @@ export const mutations = {
 
 export const actions = {
   async nuxtServerInit({ commit, dispatch }) {
-    let response = await this.$axios.$get("categories");
+    let response = await this.$axios.$get("api/categories");
     commit("SET_CATEGORIES", response.data);
     
     if(this.$auth.loggedIn) {
       await dispatch('cart/getCart');
     }
-  }
+  } 
 };

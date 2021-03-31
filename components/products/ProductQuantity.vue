@@ -39,7 +39,6 @@
 export default {
   methods: {
     changedQuantityFromTextField() {
-      console.log('burada');
       if (this.$parent.quantity > this.$parent.stock) {
         this.$parent.quantity = this.$parent.stock;
       } else if (this.$parent.quantity < 1) {

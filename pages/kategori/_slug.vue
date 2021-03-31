@@ -17,8 +17,9 @@ export default {
       products: null,
     };
   },
+  
   async asyncData({ params, app }) {
-    let response = await app.$axios.$get(`/products?category=${params.slug}`);
+    let response = await app.$axios.$get(`api/products?category=${params.slug}`);
 
     return {
       products: response.data,

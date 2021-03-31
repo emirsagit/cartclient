@@ -56,7 +56,7 @@ export const getters = {
 
 export const actions = {
   async getCart({ commit }) {
-    let response = await this.$axios.$get("cart");
+    let response = await this.$axios.$get("api/cart");
     commit("SET_PRODUCTS", response.data);
     commit("SET_EMPTY", response.meta.empty);
     commit("SET_TOTAL", response.meta.total);
@@ -65,13 +65,13 @@ export const actions = {
   },
 
   async destroy({ dispatch }, productId) {
-    let response = await this.$axios.$delete(`cart/${productId}`);
+    let response = await this.$axios.$delete(`api/cart/${productId}`);
 
     dispatch("getCart");
   },
 
   async store({ dispatch }, products ) {
-    await this.$axios.$post("cart", {
+    await this.$axios.$post("api/cart", {
       products: products
     });
 
@@ -79,7 +79,7 @@ export const actions = {
   },
 
   async update({ dispatch }, { productId, quantity }) {
-    let response = await this.$axios.$patch(`cart/${productId}`, {
+    let response = await this.$axios.$patch(`api/cart/${productId}`, {
       quantity
     });
 

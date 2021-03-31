@@ -132,7 +132,7 @@ export default {
 
     async register() {
       try {
-        await this.$axios.post("http://laravel.loc/register", this.form);
+        await this.$axios.post("register", this.form);
         let response = await this.$auth.loginWith("laravelSanctum", {
           data: {
             email: this.form.email,

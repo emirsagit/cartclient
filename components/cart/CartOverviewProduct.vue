@@ -44,7 +44,7 @@
       >
         <select
           type="number"
-          class="bg-white dark:bg-gray-800 appearance-none z-10 pl-3 py-3 w-full text-sm border border-transparent focus:outline-none focus:border-indigo-700 text-gray-800 dark:text-gray-100 rounded"
+          class="bg-white dark:bg-gray-800 appearance-none z-10 pl-3 py-3 w-full text-sm border border-transparent focus:outline-none text-gray-800 dark:text-gray-100 rounded"
           v-model="quantity"
         >
           <option value="0" v-if="product.quantity == 0">0</option>

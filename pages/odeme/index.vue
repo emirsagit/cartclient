@@ -1,18 +1,21 @@
 <template>
-  <div class="flex flex-col lg:flex-row justify-center my-6">
+  <div class="flex flex-col lg:flex-row my-6">
     <div
       class="flex flex-col w-full p-4 lg:p-8 text-gray-800 bg-white lg:w-3/5"
     >
-      <div
-        class="h-3 w-full border-gray-700 rounded-full border-2 flex flex-row"
-      >
-        <div class="w-1/2 h-full bg-green-700"></div>
-        <div class="w-1/2 h-full"></div>
+      <div class="w-full rounded border flex flex-row h-4">
+        <div class="w-1/2 h-full bg-teal-800"></div>
+        <div class="w-1/2 h-full" :class="{ 'bg-teal-800': showPayment }"></div>
       </div>
-      <addresses v-if="!selectedAddress" />
+      <addresses
+        :addresses="addresses"
+        :selectedAddress="selectedAddress"
+        :billingAddress="billingAddress"
+        v-if="!showPayment"
+      />
       <payment v-else />
     </div>
-    <div class="w-full lg:relative lg:w-2/5 flex flex-col">
+    <div class="w-full p-4 lg:p-8 lg:pl-4 lg:relative lg:w-2/5 flex flex-col">
       <total-overview></total-overview>
       <div
         class="flex w-full flex-col px-2 lg:px-8 text-gray-900 items-start border py-2"
@@ -28,9 +31,12 @@
         </p>
         <button
           class="w-full px-4 py-2 bg-teal-800 text-white lg:rounded-lg font-extrabold text-xl rounded-t hover:bg-teal-700"
-          :class="{ 'opacity-50 hover:bg-teal-800': isEmpty }"
+          :class="{
+            'opacity-50 hover:bg-teal-800': !addressDetached,
+          }"
+          @click.prevent="showPayment = true"
         >
-          Onayla ve Bitir
+          Devam
         </button>
       </div>
     </div>
@@ -49,17 +55,44 @@ export default {
       subtotal: "cart/subtotal",
       isEmpty: "cart/isEmpty",
     }),
-  },
-  components: {
-    TotalOverview,
-    Payment,
-    Addresses,
+
+    addressDetached() {
+      return this.addresses.length > 0 && !this.isEmpty;
+    },
   },
 
   data() {
     return {
       selectedAddress: "",
+      billingAddress: "",
+      showPayment: false,
+      addresses: [],
+      cities: [],
     };
+  },
+
+  async asyncData({ app }) {
+    let response = await app.$axios.$get("api/addresses");
+    let cities = await app.$axios.$get("api/cities");
+
+    return {
+      addresses: response.data,
+      cities: cities.data,
+    };
+  },
+
+  methods: {
+    isShowPaymentPage() {
+      if (this.addressDetached) {
+        this.showPayment = true;
+      }
+    },
+  },
+
+  components: {
+    TotalOverview,
+    Payment,
+    Addresses,
   },
 };
 </script>

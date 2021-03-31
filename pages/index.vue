@@ -70,15 +70,15 @@ export default {
     }),
   },
 
-  async asyncData({ params, app }) {
+  async asyncData({ app }) {
     let [
       products,
       productsMentionedHomepage,
       productsMentionedSlider,
     ] = await Promise.all([
-      app.$axios.$get(`/products`),
-      app.$axios.$get(`/products?homepage=true`),
-      app.$axios.$get(`/products?slider=true`),
+      app.$axios.$get("api/products"),
+      app.$axios.$get("api/products?homepage=true"),
+      app.$axios.$get("api/products?slider=true"),
     ]);
     return {
       product: products.data,

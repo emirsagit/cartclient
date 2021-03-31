@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-1">
+  <div class="">
     <table
       class="w-full text-sm lg:text-base flex flex-col justify-between"
       cellspacing="0"

@@ -79,7 +79,7 @@ export default {
       this.reset();
       this.radioIsDisabled = false;
       let response = await this.$axios.$get(
-        `/products/${this.product.slug}/attributes/${this.selectedAttribute}`
+        `api/products/${this.product.slug}/attributes/${this.selectedAttribute}`
       );
       this.options = response.data;
     },
