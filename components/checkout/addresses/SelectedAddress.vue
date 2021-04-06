@@ -1,5 +1,5 @@
 <template>
-  <div class="my-4 border flex flex-col rounded">
+  <div class="border flex flex-col rounded">
     <div class="p-4">
       <div class="flex flex-row justify-between">
         <p class="font-bold">Teslimat Adresi:</p>

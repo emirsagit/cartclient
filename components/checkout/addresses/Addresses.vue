@@ -14,15 +14,14 @@
       @changeAddress="changeAddressRequest"
       @addAddress="addAddressRequest"
     />
-    <button
-      class="w-full px-4 py-2 bg-teal-800 text-white rounded-lg font-extrabold text-xl hover:bg-teal-700"
+    <go-payment-button
+      class="rounded-lg"
       :class="{
         'opacity-50 hover:bg-teal-800': !$parent.addressDetached,
       }"
-      @click.prevent="$parent.isShowPaymentPage()"
-    >
-      Devam
-    </button>
+      @clicked="$parent.isShowPaymentPage()"
+      v-if="!creating && !selecting"
+    />
     <address-change
       v-if="selecting && hasMultipleAddresses"
       :localAddresses="localAddresses"
@@ -40,6 +39,7 @@ import AddressChange from "./AddressChange.vue";
 import BillingAddress from "./BillingAddress.vue";
 import SelectedAddress from "./SelectedAddress.vue";
 import AddressCreate from "./AddressCreate.vue";
+import GoPaymentButton from "../form/GoPaymentButton.vue";
 export default {
   props: ["addresses", "selectedAddress", "billingAddress"],
 
@@ -48,6 +48,7 @@ export default {
     BillingAddress,
     SelectedAddress,
     AddressCreate,
+    GoPaymentButton,
   },
 
   data() {
@@ -63,13 +64,13 @@ export default {
   watch: {
     billingAddressIsSame() {
       if (this.billingAddressIsSame) {
-        this.$parent.billingAddress = this.$parent.selectedAddress;
+        this.$parent.form.billingAddress = this.$parent.form.selectedAddress;
       }
     },
 
     selectedAddress() {
       if (this.billingAddressIsSame) {
-        this.$parent.billingAddress = this.$parent.selectedAddress;
+        this.$parent.form.billingAddress = this.$parent.form.selectedAddress;
       }
     },
   },
@@ -88,15 +89,15 @@ export default {
 
   created() {
     this.switchAddress(this.defaultAddress);
-    this.$parent.billingAddress = this.defaultAddress;
+    this.$parent.form.billingAddress = this.defaultAddress;
   },
 
   methods: {
     switchAddress(address) {
       if (this.type == "billing") {
-        this.$parent.billingAddress = address;
+        this.$parent.form.billingAddress = address;
       } else {
-        this.$parent.selectedAddress = address;
+        this.$parent.form.selectedAddress = address;
       }
     },
 

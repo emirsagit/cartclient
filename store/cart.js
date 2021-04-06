@@ -1,9 +1,12 @@
+import queryString from "query-string";
+
 export const state = () => ({
   products: [],
   empty: false,
   subtotal: false,
   total: false,
-  stockHasChanged: false
+  stockHasChanged: false,
+  shipping: false
 });
 
 export const mutations = {
@@ -25,6 +28,10 @@ export const mutations = {
 
   SET_STOCKHASCHANGED(state, stockHasChanged) {
     state.stockHasChanged = stockHasChanged;
+  },
+
+  SET_SHIPPING(state, shipping) {
+    state.shipping = shipping;
   }
 };
 
@@ -42,21 +49,33 @@ export const getters = {
   },
 
   total(state) {
-    return state.subtotal;
+    return state.total;
   },
 
   subtotal(state) {
-    return state.total;
+    return state.subtotal;
   },
 
   stockHasChanged(state) {
     return state.stockHasChanged;
+  },
+
+  shipping(state) {
+    return state.shipping;
   }
 };
 
 export const actions = {
-  async getCart({ commit }) {
-    let response = await this.$axios.$get("api/cart");
+  async getCart({ commit, state }) {
+    let query = {};
+
+    if (state.shipping) {
+      query.shipping_id = state.shipping.id;
+    }
+    console.log(query.shipping_id);
+
+    let response = await this.$axios.$get(`api/cart?${queryString.stringify(query)}`);
+
     commit("SET_PRODUCTS", response.data);
     commit("SET_EMPTY", response.meta.empty);
     commit("SET_TOTAL", response.meta.total);
@@ -70,7 +89,7 @@ export const actions = {
     dispatch("getCart");
   },
 
-  async store({ dispatch }, products ) {
+  async store({ dispatch }, products) {
     await this.$axios.$post("api/cart", {
       products: products
     });
@@ -84,5 +103,9 @@ export const actions = {
     });
 
     dispatch("getCart");
+  },
+
+  async setShipping({ commit }, shippingMethod) {
+    commit("SET_SHIPPING", shippingMethod);
   }
 };
