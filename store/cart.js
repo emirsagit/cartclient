@@ -72,9 +72,10 @@ export const actions = {
     if (state.shipping) {
       query.shipping_id = state.shipping.id;
     }
-    console.log(query.shipping_id);
 
-    let response = await this.$axios.$get(`api/cart?${queryString.stringify(query)}`);
+    let response = await this.$axios.$get(
+      `api/cart?${queryString.stringify(query)}`
+    );
 
     commit("SET_PRODUCTS", response.data);
     commit("SET_EMPTY", response.meta.empty);
@@ -98,7 +99,7 @@ export const actions = {
   },
 
   async update({ dispatch }, { productId, quantity }) {
-    let response = await this.$axios.$patch(`api/cart/${productId}`, {
+    await this.$axios.$patch(`api/cart/${productId}`, {
       quantity
     });
 

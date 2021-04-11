@@ -75,13 +75,15 @@
             v-if="!showPayment"
           />
           <finish-payment-button
-            @clicked="isShowPaymentPage()"
+            @clicked="order()"
             class="lg:rounded-lg rounded-t"
             :class="{
-              'opacity-50 hover:bg-teal-800': !paymentValidate,
+              'opacity-50 hover:bg-teal-800': submitting,
             }"
             v-if="showPayment"
           />
+
+          <!-- add paymentValidate next time -->
         </div>
       </div>
     </div>
@@ -130,9 +132,11 @@ export default {
   data() {
     return {
       showPayment: false,
+      submitting: false,
       addresses: [],
       cities: [],
       shippings: "",
+      payAtDoor: false,
       paymentValidate: false,
       form: {
         selectedAddress: "",
@@ -159,9 +163,29 @@ export default {
       }
     },
 
+    async order() {
+      this.submitting = true;
+
+      try {
+        await this.$axios.$post("api/order", {
+          delivery_id: this.form.selectedAddress.id,
+          billing_id: this.form.billingAddress.id,
+          shipping_id: this.shippingMethod.id,
+          pay_at_door: this.payAtDoor,
+        });
+        await this.getCart();
+        this.$router.replace("siparislerim");
+      } catch (error) {
+        await this.setMessage(error.response.data.message);
+        await this.getCart();
+        this.$router.replace('sepet');
+      }
+    },
+
     ...mapActions({
       setShipping: "cart/setShipping", //also supports payload `this.nameOfAction(amount)`
       getCart: "cart/getCart", //also supports payload `this.nameOfAction(amount)`
+      setMessage: "flash/setMessage",
     }),
   },
 

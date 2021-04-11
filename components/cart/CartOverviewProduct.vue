@@ -2,7 +2,10 @@
   <tr class="flex justify-between md:justify-around h-36 py-2 px-1 mb-4 border">
     <td class="hidden md:flex">
       <div class="w-32 h-32">
-        <nuxt-link :to="`/urun/${product.product.slug}`" class="flex flex-col justify-center">
+        <nuxt-link
+          :to="`/urun/${product.product.slug}`"
+          class="flex flex-col justify-center"
+        >
           <img
             :src="product.product.image"
             class="rounded img-fluid"
@@ -16,11 +19,16 @@
     <td
       class="flex flex-col p-1 md:p-2 text-gray-900 justify-between md:items-center"
     >
-      <nuxt-link :to="`/urun/${product.product.slug}`" class="flex flex-col mb-2 md:mb-0 text-sm md:text-center"
+      <nuxt-link
+        :to="`/urun/${product.product.slug}`"
+        class="flex flex-col mb-2 md:mb-0 text-sm md:text-center"
         ><span class="font-bold text-lg">{{ product.product.name }}</span> (
         {{ product.attribute_value }} - {{ product.option_value }} )</nuxt-link
       >
-      <a class="text-gray-700 flex items-center hover:text-gray-900 cursor-pointer" @click.prevent="destroy(product.id)">
+      <a
+        class="text-gray-700 flex items-center hover:text-gray-900 cursor-pointer"
+        @click.prevent="destroy(product.id)"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -108,22 +116,27 @@ import { mapActions } from "vuex";
 export default {
   props: ["product"],
 
-  data() {
-    return {
-      quantity: this.product.quantity,
-    };
+  computed: {
+    quantity: {
+      get() {
+        return this.product.quantity;
+      },
+      set(quantity) {
+        this.update({ productId: this.product.id, quantity: quantity });
+      },
+    },
   },
 
-  watch: {
-    quantity(quantity) {
-      this.update({ productId: this.product.id, quantity: quantity })
-    }
-  },
+  // watch: {
+  //   quantity(quantity) {
+  //     this.update({ productId: this.product.id, quantity: quantity });
+  //   },
+  // },
 
   methods: {
     ...mapActions({
       destroy: "cart/destroy",
-      update: "cart/update"
+      update: "cart/update",
     }),
   },
 };
