@@ -1,4 +1,4 @@
 import Vue from 'vue'
-import { MazPhoneNumberInput } from "maz-ui";
+import VueCardFormat from "vue-credit-card-validation";
 
-Vue.use(MazPhoneNumberInput)
+Vue.use(VueCardFormat)

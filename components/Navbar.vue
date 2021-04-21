@@ -6,14 +6,16 @@
       <div class="flex flex-col items-end">
         <div class="flex flex-row font-bold py-1 items-center">
           <template v-if="this.$auth.loggedIn">
-            <p class="px-2">Hoşgeldiniz {{ this.$auth.user.name }}</p>
-            <a
-              href="#"
-              class="px-2 text-teal-700 hover:text-teal-800"
-              @click.prevent="logout"
-              >Çıkış</a
+            <p class="px-2">Merhaba {{ this.$auth.user.name }}</p>
+            <nuxt-link
+              to="/hesabim"
+              class="px-2 text-teal-700 hover:text-teal-800 cursor-pointer"
+              >Hesabım</nuxt-link
             >
-            <nuxt-link to="/sepet" class="pl-2 pr-6 flex flex-row cursor-pointer">
+            <nuxt-link
+              to="/sepet"
+              class="pl-2 pr-6 flex flex-row cursor-pointer"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
@@ -170,12 +172,6 @@ export default {
       showMenu: false,
       dropDownOpen: false,
     };
-  },
-
-  methods: {
-    async logout() {
-      await this.$auth.logout();
-    },
   },
 
   computed: {

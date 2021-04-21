@@ -1,30 +1,6 @@
 <template>
   <div class="flex flex-col my-6 p-4 lg:p-8">
-    <div class="w-full h-16 flex flex-row">
-      <div
-        class="w-1/2 bg-gray-200 text-xl flex items-center justify-center cursor-pointer"
-        :class="{ 'bg-gray-700 text-white': !showPayment }"
-        @click.prevent="showPayment = false"
-      >
-        <p>ADRES</p>
-      </div>
-      <div
-        class="w-1/2 bg-gray-200 text-xl flex items-center justify-center cursor-pointer"
-        :class="{ 'bg-gray-700 text-white': showPayment }"
-        @click.prevent="isShowPaymentPage()"
-      >
-        <p>ÖDEME</p>
-      </div>
-    </div>
-    <div class="h-6 bg-gray-400">
-      <div
-        class="h-full flex justify-center items-center w-1/2 bg-teal-800 text-white"
-        :class="{ 'w-full': showPayment }"
-      >
-        <p class="" v-if="!showPayment">%50</p>
-        <p class="" v-else>%100</p>
-      </div>
-    </div>
+    <payment-header />
     <div class="flex flex-col lg:flex-row my-4">
       <div class="flex flex-col w-full text-gray-800 bg-white lg:w-3/5">
         <addresses
@@ -39,7 +15,20 @@
           v-model="shippingMethod"
           :selectedShipping="shippingMethod"
         />
-        <payment v-if="showPayment" />
+        <payment
+          v-if="showPayment"
+          :total="total"
+          :card="card"
+          :submitting="submitting"
+          @charge="order"
+          v-model="card"
+        />
+        <installment
+          :installments="installments"
+          v-if="showPayment && installments"
+          v-model="selectedInstallment"
+          :selectedInstallment="selectedInstallment"
+        />
       </div>
       <div
         class="w-full lg:pl-4 lg:relative lg:w-2/5 flex flex-col mt-4 lg:mt-0"
@@ -50,7 +39,7 @@
           >
             SİPARİŞ ÖZETİ
           </p>
-          <total-overview></total-overview>
+          <total-overview />
         </div>
         <div
           class="flex w-full flex-col px-2 lg:px-8 text-gray-900 items-start border py-2"
@@ -58,6 +47,12 @@
           <p class="text-gray-700 text-md mb-1">Ara Toplam: {{ subtotal }}</p>
           <p class="text-gray-700 text-md mb-1" v-if="shippingMethod">
             Kargo Ücreti: {{ shippingMethod.price }}
+          </p>
+          <p
+            class="text-gray-700 text-md mb-1"
+            v-if="selectedInstallment.installment_number > 1"
+          >
+            Taksit Farkı: {{ selectedInstallment.installment_difference }}
           </p>
         </div>
         <div
@@ -87,46 +82,32 @@
         </div>
       </div>
     </div>
+    <div v-html="secure">{{ secure }}</div>
   </div>
 </template>
 
 <script>
+import { mapActions } from "vuex";
+import { mapGetters } from "vuex";
 import TotalOverview from "../../components/checkout/total/TotalOverview.vue";
 import Payment from "../../components/checkout/payment/Payment.vue";
+import PaymentHeader from "../../components/checkout/payment/components/PaymentHeader.vue";
 import Addresses from "../../components/checkout/addresses/Addresses.vue";
 import GoPaymentButton from "../../components/checkout/form/GoPaymentButton.vue";
 import FinishPaymentButton from "../../components/checkout/form/FinishPaymentButton.vue";
-import { mapGetters } from "vuex";
-import { mapActions } from "vuex";
 import Shipping from "../../components/checkout/shipping/Shipping.vue";
+import Installment from "../../components/checkout/payment/components/Installment.vue";
 
 export default {
-  computed: {
-    ...mapGetters({
-      subtotal: "cart/subtotal",
-      total: "cart/total",
-      isEmpty: "cart/isEmpty",
-      shipping: "cart/shipping",
-    }),
-
-    addressDetached() {
-      return this.addresses.length > 0 && !this.isEmpty;
-    },
-
-    shippingMethod: {
-      get() {
-        return this.shipping ? this.shipping : "";
-      },
-      set(value) {
-        this.setShipping(value);
-      },
-    },
-  },
-
-  watch: {
-    shippingMethod() {
-      this.getCart();
-    },
+  components: {
+    TotalOverview,
+    Payment,
+    Addresses,
+    GoPaymentButton,
+    FinishPaymentButton,
+    Shipping,
+    PaymentHeader,
+    Installment,
   },
 
   data() {
@@ -141,8 +122,94 @@ export default {
       form: {
         selectedAddress: "",
         billingAddress: "",
+        has3ds: true,
       },
+      card: {
+        cardHolder: "",
+        cardNumber: "",
+        expirationYear: "",
+        expirationMonth: "",
+        cvv: "",
+      },
+      secure: "",
+      order_id: "",
+      installments: "",
+      existingCardNumber: "",
     };
+  },
+
+  computed: {
+    ...mapGetters({
+      subtotal: "cart/subtotal",
+      total: "cart/total",
+      isEmpty: "cart/isEmpty",
+      shipping: "cart/shipping",
+      installment: "cart/installment",
+    }),
+
+    addressDetached() {
+      return this.addresses.length > 0 && !this.isEmpty;
+    },
+
+    shippingMethod: {
+      get() {
+        return this.shipping ? this.shipping : "";
+      },
+      set(value) {
+        this.setShipping(value);
+      },
+    },
+
+    selectedInstallment: {
+      get() {
+        return this.installment ? this.installment : "";
+      },
+      set(value) {
+        this.setInstallment(value);
+      },
+    },
+
+    cardLength() {
+      return this.card.cardNumber.length;
+    },
+
+    isRetrieveInstallments() {
+      return this.existingCardNumber != this.card.cardNumber.substr(0, 6);
+    },
+  },
+
+  watch: {
+    shippingMethod() {
+      this.getCart();
+      this.reset();
+    },
+
+    selectedInstallment() {
+      this.getCart();
+    },
+
+    cardLength() {
+      if (this.cardLength >= 6 && this.isRetrieveInstallments) {
+        this.installmentRequest();
+      }
+    },
+
+    installments() {
+      if (this.installments) {
+        this.setInstallment(
+          this.installments.find((ins) => {
+            return ins.installment_number == 1;
+          })
+        );
+      }
+    },
+
+    subtotal() {
+      this.reset();
+      if (this.isEmpty) {
+        this.$router.replace("sepet");
+      }
+    },
   },
 
   async asyncData({ app }) {
@@ -163,22 +230,52 @@ export default {
       }
     },
 
+    reset() {
+      this.installments = "";
+      this.card.cardNumber = "";
+      this.setInstallment("");
+      this.existingCardNumber = "";
+    },
+
+    async installmentRequest() {
+      try {
+        this.existingCardNumber = this.card.cardNumber.substr(0, 6);
+        var response = await this.$axios.$post("api/payment/installment", {
+          card_number: this.card.cardNumber,
+          shipping_id: this.shippingMethod.id,
+        });
+        this.installments = response.data;
+      } catch {}
+    },
+
     async order() {
       this.submitting = true;
 
       try {
-        await this.$axios.$post("api/order", {
+        var response = await this.$axios.$post("api/orders", {
           delivery_id: this.form.selectedAddress.id,
           billing_id: this.form.billingAddress.id,
           shipping_id: this.shippingMethod.id,
           pay_at_door: this.payAtDoor,
+          selected_address: this.form.selectedAddress,
+          billing_address: this.form.billingAddress,
+          has3ds: this.form.has3ds,
         });
+        if (this.form.has3ds) {
+          await (this.secure = response);
+          document.getElementById("iyzico-3ds-form").submit();
+        }
         await this.getCart();
-        this.$router.replace("siparislerim");
+        await (this.order_id = response.data.id);
+        this.$router.replace({
+          name: "odeme-sonrasi-order-id",
+          params: { id: this.order_id },
+        });
       } catch (error) {
-        await this.setMessage(error.response.data.message);
-        await this.getCart();
-        this.$router.replace('sepet');
+        if (error.response) {
+          await this.setMessage(error.response.data.message);
+          await this.getCart();
+        }
       }
     },
 
@@ -186,16 +283,8 @@ export default {
       setShipping: "cart/setShipping", //also supports payload `this.nameOfAction(amount)`
       getCart: "cart/getCart", //also supports payload `this.nameOfAction(amount)`
       setMessage: "flash/setMessage",
+      setInstallment: "cart/setInstallment",
     }),
-  },
-
-  components: {
-    TotalOverview,
-    Payment,
-    Addresses,
-    GoPaymentButton,
-    FinishPaymentButton,
-    Shipping,
   },
 
   created() {

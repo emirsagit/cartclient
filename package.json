@@ -15,6 +15,7 @@
     "nuxt": "^2.15.3",
     "nuxt-socket-io": "^1.1.14",
     "query-string": "^7.0.0",
+    "vue-imask": "^6.0.7",
     "vue-slick-carousel": "^1.0.6",
     "vuelidate": "^0.7.6"
   },

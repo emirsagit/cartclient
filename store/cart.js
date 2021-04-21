@@ -6,7 +6,8 @@ export const state = () => ({
   subtotal: false,
   total: false,
   stockHasChanged: false,
-  shipping: false
+  shipping: false,
+  installment: false
 });
 
 export const mutations = {
@@ -32,6 +33,10 @@ export const mutations = {
 
   SET_SHIPPING(state, shipping) {
     state.shipping = shipping;
+  },
+
+  SET_INSTALLMENT(state, installment) {
+    state.installment = installment;
   }
 };
 
@@ -62,6 +67,10 @@ export const getters = {
 
   shipping(state) {
     return state.shipping;
+  },
+
+  installment(state) {
+    return state.installment;
   }
 };
 
@@ -71,6 +80,9 @@ export const actions = {
 
     if (state.shipping) {
       query.shipping_id = state.shipping.id;
+    }
+    if (state.installment) {
+      query.installment_id = state.installment.id;
     }
 
     let response = await this.$axios.$get(
@@ -108,5 +120,9 @@ export const actions = {
 
   async setShipping({ commit }, shippingMethod) {
     commit("SET_SHIPPING", shippingMethod);
+  },
+
+  async setInstallment({ commit }, installment) {
+    commit("SET_INSTALLMENT", installment);
   }
 };
