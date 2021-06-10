@@ -22,6 +22,9 @@
           :submitting="submitting"
           @charge="order"
           v-model="card"
+          :errors="errors"
+          @validation="changeValidation"
+          @clearError="clearError"
         />
         <installment
           :installments="installments"
@@ -33,28 +36,7 @@
       <div
         class="w-full lg:pl-4 lg:relative lg:w-2/5 flex flex-col mt-4 lg:mt-0"
       >
-        <div class="rounded flex flex-col w-full border">
-          <p
-            class="text-gray-800 bg-gray-400 w-full text-center py-2 font-semibold"
-          >
-            SİPARİŞ ÖZETİ
-          </p>
-          <total-overview />
-        </div>
-        <div
-          class="flex w-full flex-col px-2 lg:px-8 text-gray-900 items-start border py-2"
-        >
-          <p class="text-gray-700 text-md mb-1">Ara Toplam: {{ subtotal }}</p>
-          <p class="text-gray-700 text-md mb-1" v-if="shippingMethod">
-            Kargo Ücreti: {{ shippingMethod.price }}
-          </p>
-          <p
-            class="text-gray-700 text-md mb-1"
-            v-if="selectedInstallment.installment_number > 1"
-          >
-            Taksit Farkı: {{ selectedInstallment.installment_difference }}
-          </p>
-        </div>
+        <payment-overview />
         <div
           class="fixed bottom-0 lg:relative bg-white z-30 flex w-full flex-row justify-around lg:justify-between px-1 md:px-2 lg:px-8 text-gray-900 items-center border"
         >
@@ -72,10 +54,13 @@
           <finish-payment-button
             @clicked="order()"
             class="lg:rounded-lg rounded-t"
-            :class="{
-              'opacity-50 hover:bg-teal-800': submitting,
-            }"
+            :class="
+              submitting || cardInvalid
+                ? 'opacity-75 hover:bg-teal-800'
+                : 'hover:bg-teal-900'
+            "
             v-if="showPayment"
+            :disabled="submitting || cardInvalid"
           />
 
           <!-- add paymentValidate next time -->
@@ -89,7 +74,6 @@
 <script>
 import { mapActions } from "vuex";
 import { mapGetters } from "vuex";
-import TotalOverview from "../../components/checkout/total/TotalOverview.vue";
 import Payment from "../../components/checkout/payment/Payment.vue";
 import PaymentHeader from "../../components/checkout/payment/components/PaymentHeader.vue";
 import Addresses from "../../components/checkout/addresses/Addresses.vue";
@@ -97,10 +81,10 @@ import GoPaymentButton from "../../components/checkout/form/GoPaymentButton.vue"
 import FinishPaymentButton from "../../components/checkout/form/FinishPaymentButton.vue";
 import Shipping from "../../components/checkout/shipping/Shipping.vue";
 import Installment from "../../components/checkout/payment/components/Installment.vue";
+import PaymentOverview from "../../components/checkout/payment/components/PaymentOverview.vue";
 
 export default {
   components: {
-    TotalOverview,
     Payment,
     Addresses,
     GoPaymentButton,
@@ -108,6 +92,7 @@ export default {
     Shipping,
     PaymentHeader,
     Installment,
+    PaymentOverview,
   },
 
   data() {
@@ -117,24 +102,25 @@ export default {
       addresses: [],
       cities: [],
       shippings: "",
-      payAtDoor: false,
-      paymentValidate: false,
+      cardInvalid: true,
+      secure: "",
+      order_id: "",
+      installments: "",
+      existingCardNumber: "",
+      errors: {},
       form: {
         selectedAddress: "",
         billingAddress: "",
-        has3ds: true,
+        payAtDoor: false,
       },
       card: {
         cardHolder: "",
         cardNumber: "",
         expirationYear: "",
         expirationMonth: "",
-        cvv: "",
+        cvc: "",
+        has3ds: false,
       },
-      secure: "",
-      order_id: "",
-      installments: "",
-      existingCardNumber: "",
     };
   },
 
@@ -186,9 +172,16 @@ export default {
 
     selectedInstallment() {
       this.getCart();
+      this.card.has3ds = this.selectedInstallment.force3ds;
     },
 
     cardLength() {
+      if (this.installment && this.cardLength < 6) {
+        this.setInstallment("");
+        this.installments = "";
+        this.existingCardNumber = "";
+      }
+
       if (this.cardLength >= 6 && this.isRetrieveInstallments) {
         this.installmentRequest();
       }
@@ -224,18 +217,12 @@ export default {
   },
 
   methods: {
-    isShowPaymentPage() {
-      if (this.addressDetached) {
-        this.showPayment = true;
-      }
-    },
-
-    reset() {
-      this.installments = "";
-      this.card.cardNumber = "";
-      this.setInstallment("");
-      this.existingCardNumber = "";
-    },
+    ...mapActions({
+      setShipping: "cart/setShipping", //also supports payload `this.nameOfAction(amount)`
+      getCart: "cart/getCart", //also supports payload `this.nameOfAction(amount)`
+      setMessage: "flash/setMessage",
+      setInstallment: "cart/setInstallment",
+    }),
 
     async installmentRequest() {
       try {
@@ -255,42 +242,89 @@ export default {
         var response = await this.$axios.$post("api/orders", {
           delivery_id: this.form.selectedAddress.id,
           billing_id: this.form.billingAddress.id,
+          pay_at_door: this.form.payAtDoor,
           shipping_id: this.shippingMethod.id,
-          pay_at_door: this.payAtDoor,
           selected_address: this.form.selectedAddress,
           billing_address: this.form.billingAddress,
-          has3ds: this.form.has3ds,
+          card_holder: this.card.cardHolder,
+          card_number: this.card.cardNumber,
+          expiration_year: this.card.expirationYear,
+          expiration_month: this.card.expirationMonth,
+          has3ds: this.card.has3ds,
+          cvc: this.card.cvc,
+          installment_id: this.installment.id,
         });
-        if (this.form.has3ds) {
+        if (this.card.has3ds) {
           await (this.secure = response);
           document.getElementById("iyzico-3ds-form").submit();
         }
         await this.getCart();
-        await (this.order_id = response.data.id);
+        // await (this.order_id = response.data.id);
         this.$router.replace({
           name: "odeme-sonrasi-order-id",
-          params: { id: this.order_id },
+          params: { id: response.data.id },
         });
       } catch (error) {
         if (error.response) {
-          await this.setMessage(error.response.data.message);
-          await this.getCart();
+          let data = error.response.data;
+          if (data.message) {
+            await this.setMessage(data.message);
+            this.errors.card_holder = data.errors.card_holder
+              ? data.errors.card_holder[0]
+              : "";
+            this.errors.card_number = data.errors.card_number
+              ? data.errors.card_number[0]
+              : "";
+            this.errors.expiration_year = data.errors.expiration_year
+              ? data.errors.expiration_year[0]
+              : "";
+            this.errors.expiration_month = data.errors.expiration_month
+              ? data.errors.expiration_month[0]
+              : "";
+            this.errors.cvc = data.errors.cvc ? data.errors.cvc[0] : "";
+            await this.getCart();
+            this.submitting = false;
+          } else {
+            //error came from payment gateway
+            await this.setMessage(data);
+            this.submitting = false;
+          }
         }
       }
     },
 
-    ...mapActions({
-      setShipping: "cart/setShipping", //also supports payload `this.nameOfAction(amount)`
-      getCart: "cart/getCart", //also supports payload `this.nameOfAction(amount)`
-      setMessage: "flash/setMessage",
-      setInstallment: "cart/setInstallment",
-    }),
+    isShowPaymentPage() {
+      if (this.addressDetached) {
+        this.showPayment = true;
+      }
+    },
+
+    reset() {
+      this.installments = "";
+      this.card.cardNumber = "";
+      this.setInstallment("");
+      this.existingCardNumber = "";
+    },
+
+    changeValidation(isValid) {
+      this.cardInvalid = isValid;
+    },
+
+    clearError(parameter) {
+      console.log(parameter);
+      console.log(this.errors[parameter]);
+      this.errors[parameter] = "";
+    },
   },
 
   created() {
     if (this.shippings) {
       this.setShipping(this.shippings[0]);
       this.getCart();
+    }
+
+    if (this.$route.query.failure) {
+      this.setMessage(this.$route.query.failure);
     }
   },
 };

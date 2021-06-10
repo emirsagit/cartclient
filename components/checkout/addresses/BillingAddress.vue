@@ -21,7 +21,7 @@
             Değiştir
           </button>
           <button
-            class="font-bold text-whwite bg-teal-600 px-2 py-1 hover:bg-teal-700 rounded-lg"
+            class="font-bold text-white bg-teal-600 px-2 py-1 hover:bg-teal-700 rounded-lg"
             @click.prevent="$emit('addAddress', 'billing')"
           >
             Yeni Adres Ekle

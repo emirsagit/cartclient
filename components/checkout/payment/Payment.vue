@@ -13,6 +13,9 @@
       :submitting="submitting"
       @charge="$emit('charge')"
       v-model="localCard"
+      :errors="errors"
+      @validation="isValid"
+      @clearError="clearError"
     />
     <button
       class="bg-gray-200 hover:bg-gray-300 text-sm p-2 rounded-lg ml-4 mb-4"
@@ -26,7 +29,7 @@
 import PaymentForm from "./components/PaymentForm.vue";
 export default {
   components: { PaymentForm },
-  props: ["total", "card", "submitting"],
+  props: ["total", "card", "submitting", "errors"],
 
   data() {
     return {
@@ -46,6 +49,16 @@ export default {
         this.$emit("input", localCard);
       },
     },
+  },
+
+  methods: {
+    isValid(isValid) {
+      console.log(isValid);
+      this.$emit('validation', isValid)
+    },
+    clearError(value) {
+      this.$emit('clearError', value)
+    }
   },
 };
 </script>

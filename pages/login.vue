@@ -100,14 +100,16 @@ export default {
 
     async login() {
       try {
-        let response = await this.$auth.loginWith("laravelSanctum", {
+        await this.$axios.get("/sanctum/csrf-cookie");
+        await this.$auth.loginWith("laravelSanctum", {
           data: this.form,
         });
-        await this.$auth.strategy.token.set(response.data.token);
         await this.getCart();
-        await this.$auth.setUser(response.data.user);
+        // await this.$auth.strategy.token.set(response_data.data.token);
+        // await this.$auth.setUser(response.data.user);
       } catch (error) {
-        this.errors = error.response.data.errors;
+        console.log(error);
+        // this.errors = error.response.data.errors;
       }
     },
   },

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col text-sm lg:text-md py-4 bg-gray-200 w-full lg:items-center"
+    class="flex flex-col text-sm lg:text-md py-4 bg-gray-200 w-full lg:items-center min-h-screen"
   >
     <div class="mb-2 p-2 mx-3 flex flex-row items-center text-gray-800">
       <nuxt-link to="/hesabim">
@@ -19,7 +19,16 @@
       </nuxt-link>
       <p class="text-md lg:text-lg">Siparişlerim</p>
     </div>
-    <Order v-for="order in orders" :key="order.id" :order="order"/>
+    <template v-if="orders.length">
+      <Order v-for="order in orders" :key="order.id" :order="order" />
+    </template>
+    <div
+      class="flex flex-col p-2 mx-3 lg:mx-16 rounded-lg lg:w-2/3 shadow-lg bg-white mb-3 text-gray-800 text-center"
+      v-if="! orders.length"
+    >
+      <p class="text-gray-700">Henüz Siparişiniz Yok</p>
+      <nuxt-link class="text-blue-700 font-semibold py-1 text-xl" to="/">Buradan anasayfaya giderek fırsatlardan yararlanabilirsiniz.</nuxt-link>
+    </div>
   </div>
 </template>
 

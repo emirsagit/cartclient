@@ -45,30 +45,31 @@ export default {
       home: "/"
     },
 
-    strategies: {
+      strategies: {
       laravelSanctum: {
         provider: "laravel/sanctum",
-        url: "http://entegrasyon.test",
+        url: "http://localhost:8000",
         endpoints: {
-          login: { url: "/sanctum/token", method: "post" }
+          // login: { url: "sanctum/token", method: "post" }
+          //  login: { url: "login", method: "post" }
         },
-        token: {
-          property: "access_token",
-          maxAge: 36000
-        },
-        scheme: "local",
-        user: {
-          property: "data",
-          autoFetch: false
-        }
+        // token: {
+        //   property: "access_token",
+        //   maxAge: 36000
+        // },
+        // scheme: "local",
+        // user: {
+        //   property: "data",
+        //   autoFetch: false
+        // }
       }
     }
   },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: "http://entegrasyon.test/",
-    credentials: true
+    baseURL: "http://localhost:8000",
+    credentials: true,
   },
 
   env: {

@@ -1,10 +1,17 @@
 <template>
   <div
-    class="fixed right-0 bottom-0 p-4 text-white rounded lg:text-lg mb-2 mr-2 flex flex-col items-center z-50"
+    class="fixed right-0 bottom-0 mb-2 mr-2 flex flex-col z-50"
     :class="classes"
     v-show="message"
   >
-    <p>{{ message }}</p>
+    <!-- <span
+      class="text-right pt-2 px-4 text-white hover:text-gray-300 cursor-pointer"
+      @click="hide"
+      >X</span
+    > -->
+    <p class="px-4 py-4 text-white rounded lg:text-lg text-center">
+      {{ message }}
+    </p>
   </div>
 </template>
 

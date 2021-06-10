@@ -9,7 +9,7 @@
             class="form-checkbox"
             v-model="$parent.billingAddressIsSame"
           />
-          <span class="ml-2">Fature adresim aynı</span>
+          <span class="ml-2">Fatura adresim aynı</span>
         </label>
       </div>
       <div class="text-sm" v-if="selectedAddress">

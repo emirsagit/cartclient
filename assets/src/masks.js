@@ -13,7 +13,7 @@ export const cardMasks = {
     {
       mask: "0000 0000 0000 0000",
       regex: "^3[47]\\d{13,14}",
-      cardtype: "american express"
+      cardtype: "american"
     },
     {
       mask: "0000 0000 0000 0000",
@@ -40,4 +40,12 @@ export const cardMasks = {
 
 export const cvvMask = {
   mask: "0000"
+};
+
+export const monthMask = {
+  mask: "00"
+};
+
+export const yearMask = {
+  mask: "00"
 };
